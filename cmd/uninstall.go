@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	di "github.com/accuknox/accuknox-cli/install"
 	"github.com/cilium/cilium-cli/defaults"
 	ci "github.com/cilium/cilium-cli/install"
 
@@ -24,8 +25,20 @@ var uninstallCmd = &cobra.Command{
 	Short: "Uninstall KubeArmor, Cilium and Discovery-engine from a Kubernetes Cluster",
 	Long:  `Uninstall KubeArmor, Cilium and Discovery-engine from a Kubernetes Clusters`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		// Uninstall Discovery-engine
+		diOptions.Namespace = "explorer"
+		if err := di.DiscoveryEngineUninstaller(client, diOptions); err != nil {
+			return err
+		}
+
+		// Uninstall KubeArmor
+		if err := ki.K8sUninstaller(client, uninstallOptions); err != nil {
+			return err
+		}
+
 		// Uninstall Cilium
-		params.Namespace = namespace
+		uparams.Namespace = namespace
 
 		h := hubble.NewK8sHubble(k8sClient, hubble.Parameters{
 			Namespace:            uparams.Namespace,
@@ -37,11 +50,6 @@ var uninstallCmd = &cobra.Command{
 		uninstaller := ci.NewK8sUninstaller(k8sClient, uparams)
 		if err := uninstaller.Uninstall(context.Background()); err != nil {
 			log.Error().Msgf("Unable to uninstall Cilium: %s", err.Error())
-		}
-
-		// Uninstall KubeArmor
-		if err := ki.K8sUninstaller(client, uninstallOptions); err != nil {
-			return err
 		}
 
 		return nil

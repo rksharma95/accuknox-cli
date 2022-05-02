@@ -1,34 +1,23 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"os"
 	"time"
 
+	di "github.com/accuknox/accuknox-cli/install"
 	"github.com/cilium/cilium-cli/defaults"
 	ci "github.com/cilium/cilium-cli/install"
-	"github.com/cilium/cilium-cli/k8s"
-	"github.com/cilium/cilium/api/v1/models"
 	ki "github.com/kubearmor/kubearmor-client/install"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/types"
-
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/blang/semver/v4"
-	ciliumv2 "github.com/cilium/cilium/pkg/k8s/apis/cilium.io/v2"
-	networkingv1 "k8s.io/api/networking/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 )
 
 var (
 	namespace      string
 	installOptions ki.Options
 	params         = ci.Parameters{Writer: os.Stdout}
+	diOptions      di.Options
 )
 
 const (
@@ -36,58 +25,6 @@ const (
 	encryptionIPsec     = "ipsec"
 	encryptionWireguard = "wireguard"
 )
-
-type k8sInstallerImplementation interface {
-	ClusterName() string
-	ListNodes(ctx context.Context, options metav1.ListOptions) (*corev1.NodeList, error)
-	GetCiliumExternalWorkload(ctx context.Context, name string, opts metav1.GetOptions) (*ciliumv2.CiliumExternalWorkload, error)
-	CreateCiliumExternalWorkload(ctx context.Context, cew *ciliumv2.CiliumExternalWorkload, opts metav1.CreateOptions) (*ciliumv2.CiliumExternalWorkload, error)
-	DeleteCiliumExternalWorkload(ctx context.Context, name string, opts metav1.DeleteOptions) error
-	ListCiliumExternalWorkloads(ctx context.Context, opts metav1.ListOptions) (*ciliumv2.CiliumExternalWorkloadList, error)
-	CreateServiceAccount(ctx context.Context, namespace string, account *corev1.ServiceAccount, opts metav1.CreateOptions) (*corev1.ServiceAccount, error)
-	DeleteServiceAccount(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	GetConfigMap(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*corev1.ConfigMap, error)
-	CreateConfigMap(ctx context.Context, namespace string, config *corev1.ConfigMap, opts metav1.CreateOptions) (*corev1.ConfigMap, error)
-	DeleteConfigMap(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	CreateClusterRole(ctx context.Context, config *rbacv1.ClusterRole, opts metav1.CreateOptions) (*rbacv1.ClusterRole, error)
-	DeleteClusterRole(ctx context.Context, name string, opts metav1.DeleteOptions) error
-	CreateClusterRoleBinding(ctx context.Context, role *rbacv1.ClusterRoleBinding, opts metav1.CreateOptions) (*rbacv1.ClusterRoleBinding, error)
-	DeleteClusterRoleBinding(ctx context.Context, name string, opts metav1.DeleteOptions) error
-	CreateDaemonSet(ctx context.Context, namespace string, ds *appsv1.DaemonSet, opts metav1.CreateOptions) (*appsv1.DaemonSet, error)
-	GetDaemonSet(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*appsv1.DaemonSet, error)
-	DeleteDaemonSet(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	PatchDaemonSet(ctx context.Context, namespace, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions) (*appsv1.DaemonSet, error)
-	GetService(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*corev1.Service, error)
-	CreateService(ctx context.Context, namespace string, service *corev1.Service, opts metav1.CreateOptions) (*corev1.Service, error)
-	DeleteService(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	DeleteDeployment(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	CreateDeployment(ctx context.Context, namespace string, deployment *appsv1.Deployment, opts metav1.CreateOptions) (*appsv1.Deployment, error)
-	GetDeployment(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*appsv1.Deployment, error)
-	PatchDeployment(ctx context.Context, namespace, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions) (*appsv1.Deployment, error)
-	CheckDeploymentStatus(ctx context.Context, namespace, deployment string) error
-	DeleteNamespace(ctx context.Context, namespace string, opts metav1.DeleteOptions) error
-	CreateNamespace(ctx context.Context, namespace string, opts metav1.CreateOptions) (*corev1.Namespace, error)
-	GetNamespace(ctx context.Context, namespace string, options metav1.GetOptions) (*corev1.Namespace, error)
-	ListPods(ctx context.Context, namespace string, options metav1.ListOptions) (*corev1.PodList, error)
-	DeletePod(ctx context.Context, namespace, name string, options metav1.DeleteOptions) error
-	ExecInPod(ctx context.Context, namespace, pod, container string, command []string) (bytes.Buffer, error)
-	CreateSecret(ctx context.Context, namespace string, secret *corev1.Secret, opts metav1.CreateOptions) (*corev1.Secret, error)
-	UpdateSecret(ctx context.Context, namespace string, secret *corev1.Secret, opts metav1.UpdateOptions) (*corev1.Secret, error)
-	DeleteSecret(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	GetSecret(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*corev1.Secret, error)
-	PatchSecret(ctx context.Context, namespace, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions) (*corev1.Secret, error)
-	CreateResourceQuota(ctx context.Context, namespace string, r *corev1.ResourceQuota, opts metav1.CreateOptions) (*corev1.ResourceQuota, error)
-	DeleteResourceQuota(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error
-	AutodetectFlavor(ctx context.Context) k8s.Flavor
-	ContextName() (name string)
-	CiliumStatus(ctx context.Context, namespace, pod string) (*models.StatusResponse, error)
-	ListCiliumEndpoints(ctx context.Context, namespace string, opts metav1.ListOptions) (*ciliumv2.CiliumEndpointList, error)
-	GetRunningCiliumVersion(ctx context.Context, namespace string) (string, error)
-	GetPlatform(ctx context.Context) (*k8s.Platform, error)
-	GetServerVersion() (*semver.Version, error)
-	CreateIngressClass(ctx context.Context, r *networkingv1.IngressClass, opts metav1.CreateOptions) (*networkingv1.IngressClass, error)
-	DeleteIngressClass(ctx context.Context, name string, opts metav1.DeleteOptions) error
-}
 
 // installCmd represents the get command
 var installCmd = &cobra.Command{
@@ -113,6 +50,13 @@ var installCmd = &cobra.Command{
 		if err := ki.K8sInstaller(client, installOptions); err != nil {
 			return err
 		}
+
+		// Install dscovery-engine
+		diOptions.Namespace = "explorer"
+		if err := di.DiscoveryEngineInstaller(client, diOptions); err != nil {
+			return err
+		}
+
 		return nil
 	},
 }

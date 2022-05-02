@@ -4,6 +4,7 @@ go 1.18
 
 replace (
 	// github.com/cilium/cilium-cli/defaults => ../../cilium-cli/defaults
+	github.com/accuknox/accuknox-cli/install => ./install
 	github.com/cilium/cilium => github.com/cilium/cilium v1.10.0
 	github.com/optiopay/kafka => github.com/cilium/kafka v0.0.0-20180809090225-01ce283b732b
 	k8s.io/api => k8s.io/api v0.22.3
@@ -15,7 +16,7 @@ replace (
 )
 
 require (
-	github.com/cilium/cilium v1.11.3
+	github.com/cilium/cilium v1.11.3 // indirect
 	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220321102834-0971f727bd8a // indirect
 	github.com/kubearmor/kubearmor-client v0.6.4
 	github.com/rs/zerolog v1.26.1
@@ -30,10 +31,7 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-require (
-	github.com/blang/semver/v4 v4.0.0
-	github.com/cilium/cilium-cli v0.11.3
-)
+require github.com/cilium/cilium-cli v0.11.3
 
 require (
 	cloud.google.com/go v0.99.0 // indirect
@@ -56,6 +54,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5 // indirect
