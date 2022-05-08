@@ -6,11 +6,11 @@ import (
 
 	di "github.com/accuknox/accuknox-cli/install"
 	"github.com/cilium/cilium-cli/defaults"
-	ci "github.com/cilium/cilium-cli/install"
-
 	"github.com/cilium/cilium-cli/hubble"
-	ki "github.com/kubearmor/kubearmor-client/install"
+	ci "github.com/cilium/cilium-cli/install"
 	"github.com/rs/zerolog/log"
+
+	ki "github.com/kubearmor/kubearmor-client/install"
 	"github.com/spf13/cobra"
 )
 

@@ -20,10 +20,6 @@ install: build
 clean:
 	cd $(CURDIR); rm -f accuknox
 
-.PHONY: protobuf
-vm-protobuf:
-	cd $(CURDIR)/vm/protobuf; protoc --proto_path=. --go_opt=paths=source_relative --go_out=plugins=grpc:. vm.proto
-
 .PHONY: gofmt
 gofmt:
 	cd $(CURDIR); gofmt -s -d $(shell find . -type f -name '*.go' -print)
