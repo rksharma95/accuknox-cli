@@ -1,6 +1,6 @@
 # accuknox-cli
 
-**accuknox** is a CLI client to help manage [KubeArmor](https://github.com/kubearmor/KubeArmor), [Discovery-engine](https://github.com/accuknox/discovery-engine) and [Cilium](https://github.com/cilium/cilium).
+`accuknox` is a CLI client to help manage [KubeArmor](https://github.com/kubearmor/KubeArmor), [Discovery-engine](https://github.com/accuknox/discovery-engine) and [Cilium](https://github.com/cilium/cilium).
 
 KubeArmor is a container-aware runtime security enforcement system that
 restricts the behavior (such as process execution, file access, and networking
@@ -10,21 +10,21 @@ Discovery Engine discovers the security posture for your workloads and auto-disc
 
 ## Installation
 
-<!-- The following sections show how to install the accuknox. It can be installed either from source, or from pre-built binary releases.
+The following sections show how to install the `accuknox` CLI. It can be installed either from source, or from pre-built binary releases.
 
 ### From Script
 
-accuknox has an installer script that will automatically grab the latest version of accuknox and install it locally.
+`accuknox` has an installer script that will automatically grab the latest version of accuknox and install it locally.
 
 ```
-curl -sfL https://raw.githubusercontent.com/kubearmor/kubearmor-client/main/install.sh | sudo sh -s -- -b /usr/local/bin
+curl -sfL https://raw.githubusercontent.com/accuknox/accuknox-cli/main/install.sh | sudo sh -s -- -b /usr/local/bin
 ```
 
-The binary will be installed in `/usr/local/bin` folder. -->
+The binary will be installed in `/usr/local/bin` folder.
 
 ### From Source 
 
-Building accuknox from source provides the latest (pre-release) accuknox version.
+Building accuknox from source provides the latest (pre-release) `accuknox` version.
 
 ```
 git clone https://github.com/accuknox/accuknox-cli
