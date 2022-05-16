@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 )
 
 var (
+	disable        string
 	namespace      string
 	installOptions ki.Options
 	params         = ci.Parameters{Writer: os.Stdout}
@@ -28,53 +30,83 @@ const (
 	encryptionWireguard = "wireguard"
 )
 
+func validateDisableFlagInput(in string) error {
+	var err error = nil
+
+	type void struct{}
+	var item void
+
+	flagInputSet := map[string]void{"cilium": item, "kubearmor": item, "discoveryengine": item, "none": item}
+
+	if _, ok := flagInputSet[in]; !ok {
+		err = fmt.Errorf("❌ invalid input %q for disable flag | run  $ accuknox install --help for more", in)
+	}
+
+	return err
+}
+
 // installCmd represents the get command
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install KubeArmor, Cilium and Discovery-engine in a Kubernetes Cluster",
 	Long:  `Install KubeArmor, Cilium and Discovery-engine in a Kubernetes Clusters`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Install Cilium
-		params.Namespace = namespace
-		installer, err := ci.NewK8sInstaller(k8sClient, params)
+
+		dflag, _ := cmd.Flags().GetString("disable")
+
+		//validate disable flag input
+		err := validateDisableFlagInput(dflag)
+
 		if err != nil {
 			return err
 		}
-		cmd.SilenceUsage = true
-		if err := installer.Install(context.Background()); err != nil {
-			installer.RollbackInstallation(context.Background())
 
-			log.Error().Msgf("Unable to install Cilium: %s", err.Error())
+		if dflag != "cilium" {
+			// Install Cilium
+			params.Namespace = namespace
+			installer, err := ci.NewK8sInstaller(k8sClient, params)
+			if err != nil {
+				return err
+			}
+			cmd.SilenceUsage = true
+			if err := installer.Install(context.Background()); err != nil {
+				installer.RollbackInstallation(context.Background())
+
+				log.Error().Msgf("Unable to install Cilium: %s", err.Error())
+			}
+
+			// Enable cilium hubble
+			hparams.Namespace = namespace
+			hparams.Relay = true
+			hparams.HelmValuesSecretName = defaults.HelmValuesSecretName
+			hparams.RedactHelmCertKeys = true
+			hparams.CreateCA = true
+			h := hubble.NewK8sHubble(k8sClient, hparams)
+			if err := h.Enable(context.Background()); err != nil {
+				log.Error().Msgf("Unable to enable Hubble: %s", err.Error())
+			}
 		}
 
-		// Enable cilium hubble
-		hparams.Namespace = namespace
-		hparams.Relay = true
-		hparams.HelmValuesSecretName = defaults.HelmValuesSecretName
-		hparams.RedactHelmCertKeys = true
-		hparams.CreateCA = true
-		h := hubble.NewK8sHubble(k8sClient, hparams)
-		if err := h.Enable(context.Background()); err != nil {
-			log.Error().Msgf("Unable to enable Hubble: %s", err.Error())
+		if dflag != "kubearmor" {
+			// Install KubeArmor
+			installOptions.Namespace = namespace
+			if err := ki.K8sInstaller(client, installOptions); err != nil {
+				return err
+			}
 		}
 
-		// Install KubeArmor
-		installOptions.Namespace = namespace
-		if err := ki.K8sInstaller(client, installOptions); err != nil {
-			return err
-		}
+		if dflag != "discoveryengine" {
+			// Install MySQL DB
+			installOptions.Namespace = namespace
+			if err := di.MySQLInstaller(client); err != nil {
+				return err
+			}
 
-		// Install MySQL DB
-		installOptions.Namespace = namespace
-		if err := di.MySQLInstaller(client); err != nil {
-			return err
-		}
-
-		// Install dscovery-engine
-		diOptions.Namespace = namespace
-		// diOptions.Namespace = "explorer"
-		if err := di.DiscoveryEngineInstaller(client, diOptions); err != nil {
-			return err
+			// Install dscovery-engine
+			diOptions.Namespace = namespace
+			if err := di.DiscoveryEngineInstaller(client, diOptions); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -83,6 +115,10 @@ var installCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(installCmd)
+
+	// disable flag
+	installCmd.Flags().StringVarP(&disable, "disable", "d", "none", "disable installing a program { cilium | kubearmor | discoveryengine }")
+
 	//kubearmor
 	installCmd.Flags().StringVarP(&installOptions.KubearmorImage, "image", "i", "kubearmor/kubearmor:stable", "Kubearmor daemonset image to use")
 	installCmd.Flags().StringVarP(&namespace, "namespace", "n", "kube-system", "Namespace for resources")
