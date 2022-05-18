@@ -414,8 +414,11 @@ func DiscoveryEngineUninstaller(c *k8s.Client, o Options) error {
 		fmt.Print("Cluster Role Bindings not found...\n")
 	}
 
-	// TODO Uninstall MySQL DB
-
+	// Uninstall MySQL DB
+	fmt.Print("🔥 Uninstalling MySQL...\n")
+	if err := UninstallChart(releaseName, namespace); err != nil {
+		return nil
+	}
 	return nil
 }
 
@@ -582,6 +585,24 @@ func InstallChart(name, repo, chart string, args map[string]string) {
 
 	client.Namespace = settings.Namespace()
 	client.Run(chartRequested, vals)
+}
+
+func UninstallChart(name, namespace string) error {
+	os.Setenv("HELM_NAMESPACE", namespace)
+	settings = cli.New()
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debug); err != nil {
+		return err
+	}
+
+	client := action.NewUninstall(actionConfig)
+
+	if _, err := client.Run(name); err != nil {
+		return err
+	}
+
+	fmt.Printf("Uninstalled release, name %s \n", name)
+	return nil
 }
 
 func isChartInstallable(ch *chart.Chart) (bool, error) {
