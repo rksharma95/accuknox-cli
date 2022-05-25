@@ -268,7 +268,7 @@ func DiscoveryEngineInstaller(c *k8s.Client, o Options) error {
 
 	// create explorer namespace
 	if _, err := c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{}); err != nil {
-		return err
+		log.Print(err.Error())
 	}
 
 	// discovery-engine Service
