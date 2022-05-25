@@ -28,10 +28,12 @@ type Options struct {
 	Rule          string
 }
 
+// Resp Structure
 type Resp struct {
 	Resp []Res `json:"Res"`
 }
 
+// Res Structure
 type Res struct {
 	ClusterName     string            `json:"ClusterName"`
 	NameSpace       string            `json:"NameSpace"`
@@ -40,14 +42,17 @@ type Res struct {
 	NetworkResource []NetworkResource `json:"NetworkResource"`
 }
 
+// SystemResource Structure
 type SystemResource struct {
 	SysResource []SysResource `json:"SysResource"`
 }
 
+// NetworkResource Structure
 type NetworkResource struct {
 	NetResource []NetResource `json:"NetResource"`
 }
 
+// SysResource Structure
 type SysResource struct {
 	FromSource      string   `json:"fromSource"`
 	FilePaths       []string `json:"filePaths"`
@@ -55,44 +60,51 @@ type SysResource struct {
 	ProcessPaths    []string `json:"processPaths"`
 }
 
+// NetResource Structure
 type NetResource struct {
 	Egressess  []Egressess  `json:"Egressess"`
 	Ingressess []Ingressess `json:"Ingressess"`
 }
 
+// Egressess Structure
 type Egressess struct {
 	MatchLabels MatchLabels   `json:"MatchLabels"`
 	ToPorts     []ToPorts     `json:"ToPorts"`
 	ToEndtities []ToEndtities `json:"ToEndtities"`
 }
 
+// Ingressess Structure
 type Ingressess struct {
 	MatchLabels  MatchLabels    `json:"MatchLabels"`
 	ToPorts      []ToPorts      `json:"ToPorts"`
 	FromEntities []FromEntities `json:"FromEntities"`
 }
 
+// MatchLabels Structure
 type MatchLabels struct {
 	Container    string `json:"container"`
 	K8snamespace string `json:"k8s:io.kubernetes.pod.namespace"`
 }
 
+// ToPorts Structure
 type ToPorts struct {
 	Port     string `json:"Port"`
 	Protocol string `json:"Protocol"`
 }
 
+// FromEntities Structure
 type FromEntities struct {
 	Host      string `json:"host"`
 	Apiserver string `json:"kube-apiserver"`
 }
 
+// ToEndtities Structure
 type ToEndtities struct {
 	Host      string `json:"host"`
 	Apiserver string `json:"kube-apiserver"`
 }
 
-// Get summary on observability data
+// StartSummary : Get summary on observability data
 func StartSummary(o Options) error {
 	gRPC := ""
 

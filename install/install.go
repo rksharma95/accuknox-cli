@@ -39,6 +39,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
+// Options -- options
 type Options struct {
 	Namespace string
 }
@@ -55,6 +56,7 @@ var deploymentLabels = map[string]string{
 	"deployment": "knoxautopolicy",
 }
 
+// GetService -- Get service details
 func GetService(namespace string) *corev1.Service {
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -78,6 +80,7 @@ func GetService(namespace string) *corev1.Service {
 	}
 }
 
+// GetDeployment -- Get deployment details
 func GetDeployment(namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
@@ -137,6 +140,7 @@ func GetDeployment(namespace string) *appsv1.Deployment {
 	}
 }
 
+// GetServiceAccount -- get service account
 func GetServiceAccount(namespace string) *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
@@ -150,6 +154,7 @@ func GetServiceAccount(namespace string) *corev1.ServiceAccount {
 	}
 }
 
+// GetClusterRoleBinding -- Get cluster role bindings
 func GetClusterRoleBinding(namespace string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
 		TypeMeta: metav1.TypeMeta{
@@ -250,6 +255,7 @@ kubearmor:
 	},
 }
 
+// DiscoveryEngineInstaller -- Installer for discovery engine
 func DiscoveryEngineInstaller(c *k8s.Client, o Options) error {
 
 	o.Namespace = "explorer"
@@ -353,6 +359,7 @@ var (
 
 var settings *cli.EnvSettings
 
+// MySQLInstaller -- Install MySQL
 func MySQLInstaller(c *k8s.Client) error {
 	os.Setenv("HELM_NAMESPACE", namespace)
 	settings = cli.New()
@@ -365,6 +372,7 @@ func MySQLInstaller(c *k8s.Client) error {
 	return nil
 }
 
+// DiscoveryEngineUninstaller -- Un-installer for discovery engine
 func DiscoveryEngineUninstaller(c *k8s.Client, o Options) error {
 
 	//o.Namespace = "explorer"
@@ -516,7 +524,7 @@ func RepoUpdate() {
 	fmt.Printf("Update Complete. ⎈ Happy Helming!⎈\n")
 }
 
-// Install Helm chart
+// InstallChart -- Install Helm chart
 func InstallChart(name, repo, chart string, args map[string]string) {
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debug); err != nil {
@@ -587,6 +595,7 @@ func InstallChart(name, repo, chart string, args map[string]string) {
 	client.Run(chartRequested, vals)
 }
 
+// UninstallChart -- uninstall chart
 func UninstallChart(name, namespace string) error {
 	os.Setenv("HELM_NAMESPACE", namespace)
 	settings = cli.New()
