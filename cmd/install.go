@@ -127,7 +127,9 @@ func init() {
 	installCmd.Flags().StringVar(&params.Version, "version", defaults.Version, "Cilium version to install")
 	installCmd.Flags().StringVar(&params.BaseVersion, "base-version", defaults.Version,
 		"Specify the base Cilium version for configuration purpose in case the --version flag doesn't indicate the actual Cilium version")
-	installCmd.Flags().MarkHidden("base-version")
+	if err := installCmd.Flags().MarkHidden("base-version"); err != nil {
+		log.Print(err.Error())
+	}
 	installCmd.Flags().IntVar(&params.ClusterID, "cluster-id", 0, "Unique cluster identifier for multi-cluster")
 	installCmd.Flags().BoolVar(&params.Wait, "wait", true, "Wait for status to report success (no errors)")
 	installCmd.Flags().DurationVar(&params.WaitDuration, "wait-duration", defaults.StatusWaitDuration, "Maximum time to wait for status")

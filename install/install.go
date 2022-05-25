@@ -267,7 +267,9 @@ func DiscoveryEngineInstaller(c *k8s.Client, o Options) error {
 	}
 
 	// create explorer namespace
-	c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{})
+	if _, err := c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{}); err != nil {
+		return err
+	}
 
 	// discovery-engine Service
 	fmt.Print("Discovery-engine Service...\n")
@@ -361,7 +363,9 @@ var settings *cli.EnvSettings
 
 // MySQLInstaller -- Install MySQL
 func MySQLInstaller(c *k8s.Client) error {
-	os.Setenv("HELM_NAMESPACE", namespace)
+	if err := os.Setenv("HELM_NAMESPACE", namespace); err != nil {
+		return err
+	}
 	settings = cli.New()
 	// Add helm repo
 	RepoAdd(repoName, url)
@@ -452,7 +456,7 @@ func RepoAdd(name, url string) {
 		log.Fatal(err)
 	}
 
-	b, err := ioutil.ReadFile(repoFile)
+	b, err := ioutil.ReadFile(filepath.Clean(repoFile))
 	if err != nil && !os.IsNotExist(err) {
 		log.Fatal(err)
 	}
@@ -592,12 +596,16 @@ func InstallChart(name, repo, chart string, args map[string]string) {
 	}
 
 	client.Namespace = settings.Namespace()
-	client.Run(chartRequested, vals)
+	if _, err := client.Run(chartRequested, vals); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // UninstallChart -- uninstall chart
 func UninstallChart(name, namespace string) error {
-	os.Setenv("HELM_NAMESPACE", namespace)
+	if err := os.Setenv("HELM_NAMESPACE", namespace); err != nil {
+		return err
+	}
 	settings = cli.New()
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debug); err != nil {
@@ -624,5 +632,7 @@ func isChartInstallable(ch *chart.Chart) (bool, error) {
 
 func debug(format string, v ...interface{}) {
 	format = fmt.Sprintf("[debug] %s\n", format)
-	log.Output(2, fmt.Sprintf(format, v...))
+	if err := log.Output(2, fmt.Sprintf(format, v...)); err != nil {
+		log.Print(err.Error())
+	}
 }

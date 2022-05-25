@@ -146,8 +146,14 @@ func StartSummary(o Options) error {
 	}
 
 	var resp Resp
-	arr, _ := json.Marshal(response)
-	json.Unmarshal([]byte(arr), &resp)
+	arr, err := json.Marshal(response)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal([]byte(arr), &resp)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Deployment Details:")
 	for _, res := range resp.Resp {
