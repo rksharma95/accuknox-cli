@@ -362,7 +362,19 @@ var (
 var settings *cli.EnvSettings
 
 // MySQLInstaller -- Install MySQL
-func MySQLInstaller(c *k8s.Client) error {
+func MySQLInstaller(c *k8s.Client, namespace string) error {
+
+	nsName := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+
+	// create explorer namespace
+	if _, err := c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{}); err != nil {
+		log.Print(err.Error())
+	}
+
 	if err := os.Setenv("HELM_NAMESPACE", namespace); err != nil {
 		return err
 	}
