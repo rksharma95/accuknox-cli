@@ -183,8 +183,8 @@ github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWX
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
-github.com/accuknox/auto-policy-discovery/src v0.0.0-20220429051056-69f8b3b285df h1:1UKJI51rvx98NS3mfHYMyjKVM806vT+GHF8nDh7agUk=
-github.com/accuknox/auto-policy-discovery/src v0.0.0-20220429051056-69f8b3b285df/go.mod h1:JvnP85vzVgZiLyxxRN/gclp58CMFp1e5Xxieay9lAY4=
+github.com/accuknox/auto-policy-discovery/src v0.0.0-20220525185923-13b761d5cce6 h1:0eJuDmMpo16zDPYpMFELCRETAoNyXIFAhcXTrPr6RzU=
+github.com/accuknox/auto-policy-discovery/src v0.0.0-20220525185923-13b761d5cce6/go.mod h1:s90+c16LGIEnapOLXYs9UniSdAWUDFzvnVIUDPlx2YY=
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
 github.com/akavel/rsrc v0.8.0/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=

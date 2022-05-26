@@ -39,6 +39,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
+// Options -- options
 type Options struct {
 	Namespace string
 }
@@ -55,6 +56,7 @@ var deploymentLabels = map[string]string{
 	"deployment": "knoxautopolicy",
 }
 
+// GetService -- Get service details
 func GetService(namespace string) *corev1.Service {
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -78,6 +80,7 @@ func GetService(namespace string) *corev1.Service {
 	}
 }
 
+// GetDeployment -- Get deployment details
 func GetDeployment(namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
@@ -137,6 +140,7 @@ func GetDeployment(namespace string) *appsv1.Deployment {
 	}
 }
 
+// GetServiceAccount -- get service account
 func GetServiceAccount(namespace string) *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
@@ -150,6 +154,7 @@ func GetServiceAccount(namespace string) *corev1.ServiceAccount {
 	}
 }
 
+// GetClusterRoleBinding -- Get cluster role bindings
 func GetClusterRoleBinding(namespace string) *rbacv1.ClusterRoleBinding {
 	return &rbacv1.ClusterRoleBinding{
 		TypeMeta: metav1.TypeMeta{
@@ -250,6 +255,7 @@ kubearmor:
 	},
 }
 
+// DiscoveryEngineInstaller -- Installer for discovery engine
 func DiscoveryEngineInstaller(c *k8s.Client, o Options) error {
 
 	o.Namespace = "explorer"
@@ -261,7 +267,9 @@ func DiscoveryEngineInstaller(c *k8s.Client, o Options) error {
 	}
 
 	// create explorer namespace
-	c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{})
+	if _, err := c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{}); err != nil {
+		log.Print(err.Error())
+	}
 
 	// discovery-engine Service
 	fmt.Print("Discovery-engine Service...\n")
@@ -353,8 +361,23 @@ var (
 
 var settings *cli.EnvSettings
 
+// MySQLInstaller -- Install MySQL
 func MySQLInstaller(c *k8s.Client) error {
-	os.Setenv("HELM_NAMESPACE", namespace)
+
+	nsName := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "explorer",
+		},
+	}
+
+	// create explorer namespace
+	if _, err := c.K8sClientset.CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{}); err != nil {
+		log.Print(err.Error())
+	}
+
+	if err := os.Setenv("HELM_NAMESPACE", namespace); err != nil {
+		return err
+	}
 	settings = cli.New()
 	// Add helm repo
 	RepoAdd(repoName, url)
@@ -365,6 +388,7 @@ func MySQLInstaller(c *k8s.Client) error {
 	return nil
 }
 
+// DiscoveryEngineUninstaller -- Un-installer for discovery engine
 func DiscoveryEngineUninstaller(c *k8s.Client, o Options) error {
 
 	//o.Namespace = "explorer"
@@ -444,7 +468,7 @@ func RepoAdd(name, url string) {
 		log.Fatal(err)
 	}
 
-	b, err := ioutil.ReadFile(repoFile)
+	b, err := ioutil.ReadFile(filepath.Clean(repoFile))
 	if err != nil && !os.IsNotExist(err) {
 		log.Fatal(err)
 	}
@@ -516,7 +540,7 @@ func RepoUpdate() {
 	fmt.Printf("Update Complete. ⎈ Happy Helming!⎈\n")
 }
 
-// Install Helm chart
+// InstallChart -- Install Helm chart
 func InstallChart(name, repo, chart string, args map[string]string) {
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debug); err != nil {
@@ -584,11 +608,16 @@ func InstallChart(name, repo, chart string, args map[string]string) {
 	}
 
 	client.Namespace = settings.Namespace()
-	client.Run(chartRequested, vals)
+	if _, err := client.Run(chartRequested, vals); err != nil {
+		log.Fatal(err)
+	}
 }
 
+// UninstallChart -- uninstall chart
 func UninstallChart(name, namespace string) error {
-	os.Setenv("HELM_NAMESPACE", namespace)
+	if err := os.Setenv("HELM_NAMESPACE", namespace); err != nil {
+		return err
+	}
 	settings = cli.New()
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debug); err != nil {
@@ -615,5 +644,7 @@ func isChartInstallable(ch *chart.Chart) (bool, error) {
 
 func debug(format string, v ...interface{}) {
 	format = fmt.Sprintf("[debug] %s\n", format)
-	log.Output(2, fmt.Sprintf(format, v...))
+	if err := log.Output(2, fmt.Sprintf(format, v...)); err != nil {
+		log.Print(err.Error())
+	}
 }
