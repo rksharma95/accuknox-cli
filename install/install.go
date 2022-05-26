@@ -362,11 +362,11 @@ var (
 var settings *cli.EnvSettings
 
 // MySQLInstaller -- Install MySQL
-func MySQLInstaller(c *k8s.Client, namespace string) error {
+func MySQLInstaller(c *k8s.Client) error {
 
 	nsName := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
+			Name: "explorer",
 		},
 	}
 

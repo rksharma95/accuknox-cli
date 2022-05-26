@@ -98,7 +98,7 @@ var installCmd = &cobra.Command{
 		if dflag != "discoveryengine" {
 			// Install MySQL DB
 			installOptions.Namespace = namespace
-			if err := di.MySQLInstaller(client, installOptions.Namespace); err != nil {
+			if err := di.MySQLInstaller(client); err != nil {
 				return err
 			}
 
