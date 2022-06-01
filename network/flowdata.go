@@ -88,7 +88,7 @@ func WriteProtoFlow(res *observerpb.GetFlowsResponse) *FlowData {
 		fd.Arrow = "<-"
 	}
 
-	fd.Timestamp = fmtTimestamp("2006-01-02 15:04:05", f.GetTime())
+	fd.Timestamp = fmtTimestamp("2006-01-02 15:04:05.000", f.GetTime())
 	fd.FlowType = getFlowType(f)
 	fd.Verdict = getVerdict(f)
 

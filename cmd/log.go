@@ -47,11 +47,113 @@ var networkCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		network.StopChan = make(chan struct{})
+
+		handleFilterFlags(cmd)
+
 		if err := network.StartHubbleRelay(networkOptions); err != nil {
 			return err
 		}
 		return nil
 	},
+}
+
+func handleFilterFlags(cmd *cobra.Command) {
+	// not
+	var isBlacklist bool = false
+	if flag, _ := cmd.Flags().GetBool("not"); flag {
+		isBlacklist = true
+	}
+
+	// ip
+	if flag, _ := cmd.Flags().GetString("from-ip"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "from-ip", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "from-ip", flag)
+		}
+	}
+	if flag, _ := cmd.Flags().GetString("to-ip"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "to-ip", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "to-ip", flag)
+		}
+	}
+
+	// pod
+	if flag, _ := cmd.Flags().GetString("from-pod"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "from-pod", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "from-pod", flag)
+		}
+
+	}
+	if flag, _ := cmd.Flags().GetString("to-pod"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "to-pod", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "to-pod", flag)
+		}
+	}
+
+	// fqdn
+	if flag, _ := cmd.Flags().GetString("from-fqdn"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "from-fdqn", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "from-fqdn", flag)
+		}
+	}
+	if flag, _ := cmd.Flags().GetString("to-fqdn"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "to-fdqn", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "to-fqdn", flag)
+		}
+	}
+
+	// label
+	if flag, _ := cmd.Flags().GetString("from-label"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "from-label", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "from-label", flag)
+		}
+	}
+	if flag, _ := cmd.Flags().GetString("to-label"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "to-label", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "to-label", flag)
+		}
+	}
+
+	// port
+	if flag, _ := cmd.Flags().GetString("from-port"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "from-port", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "from-port", flag)
+		}
+	}
+	if flag, _ := cmd.Flags().GetString("to-port"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "to-port", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "to-port", flag)
+		}
+	}
 }
 
 func init() {
@@ -77,5 +179,28 @@ func init() {
 	networkCmd.Flags().BoolVarP(&networkOptions.Follow, "follow", "f", false, "Follow flows output")
 
 	// filter flags
-	// networkCmd.Flags().String()
+
+	// ip
+	networkCmd.Flags().String("from-ip", "", "Show all flows originating at the given IP address.")
+	networkCmd.Flags().String("to-ip", "", "Show all flows destined to the given IP address.")
+
+	// pod
+	networkCmd.Flags().String("from-pod", "", "Show all flows originating at the given pod name (e.g. \"/*.kubearmor.io\").")
+	networkCmd.Flags().String("to-pod", "", "Show all flows destined to the given fully qualified domain name (e.g. \"/*.kubearmor.io\").")
+
+	// fqdn
+	networkCmd.Flags().String("from-fqdn", "", "Show all flows originating at the given fully qualified domain name (e.g. \"/*.kubearmor.io\").")
+	networkCmd.Flags().String("to-fqdn", "", "Show all flows destined to the given fully qualified domain name (e.g. \"/*.kubearmor.io\").")
+
+	// label
+	networkCmd.Flags().String("from-label", "", "Show all flows originating at the given lebel.")
+	networkCmd.Flags().String("to-label", "", "Show all flows destined to the given label")
+
+	// port
+	networkCmd.Flags().String("from-port", "", "Show all flows originating at the given port.")
+	networkCmd.Flags().String("to-port", "", "Show all flows destined to the given port.")
+
+	// not
+	networkCmd.Flags().Bool("not", false, "reverse the effect of a flag.")
+
 }

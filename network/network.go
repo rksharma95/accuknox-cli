@@ -7,13 +7,16 @@ import (
 	"io"
 	"os"
 
+	"github.com/cilium/cilium/api/v1/flow"
 	"github.com/cilium/cilium/api/v1/observer"
 	"google.golang.org/grpc"
 )
 
 // Options Structure
 type Options struct {
-	Follow bool
+	Follow    bool
+	whitelist []*flow.FlowFilter
+	blacklist []*flow.FlowFilter
 }
 
 // StopChan Channel
@@ -32,6 +35,110 @@ func ConnectHubbleRelay() (*grpc.ClientConn, error) {
 	}
 
 	return conn, err
+}
+
+func UpdateBlackList(o *Options, flag string, value string) {
+	ff := &flow.FlowFilter{}
+
+	switch flag {
+	// ip
+	case "from-ip":
+		ff.SourceIp = append(ff.SourceIp, value)
+	case "to-ip":
+		ff.DestinationIp = append(ff.DestinationIp, value)
+
+	// pod
+	case "from-pod":
+		ff.SourcePod = append(ff.SourcePod, value)
+
+	case "to-pod":
+		ff.DestinationPod = append(ff.DestinationPod, value)
+
+	// fqdn
+	case "from-fqdn":
+		ff.SourceFqdn = append(ff.SourceFqdn, value)
+
+	case "to-fqdn":
+		ff.DestinationFqdn = append(ff.DestinationFqdn, value)
+
+	// label
+	case "from-label":
+		ff.SourceLabel = append(ff.SourceLabel, value)
+
+	case "to-label":
+		ff.DestinationLabel = append(ff.DestinationLabel, value)
+
+	// service
+	case "from-service":
+
+		ff.SourceService = append(ff.SourceService, value)
+
+	case "to-service":
+		ff.DestinationService = append(ff.DestinationService, value)
+
+	// port
+	case "from-port":
+		ff.SourcePort = append(ff.SourcePort, value)
+
+	case "to-port":
+		ff.DestinationPort = append(ff.DestinationPort, value)
+
+		// TODO --verdict, --http-status, --http-method, --http-path, --tcp-flag, --ip-version, --nodename
+	}
+
+	o.blacklist = append(o.blacklist, ff)
+}
+
+func UpdateWhiteList(o *Options, flag string, value string) {
+	ff := &flow.FlowFilter{}
+
+	switch flag {
+	// ip
+	case "from-ip":
+		ff.SourceIp = append(ff.SourceIp, value)
+	case "to-ip":
+		ff.DestinationIp = append(ff.DestinationIp, value)
+
+	// pod
+	case "from-pod":
+		ff.SourcePod = append(ff.SourcePod, value)
+
+	case "to-pod":
+		ff.DestinationPod = append(ff.DestinationPod, value)
+
+	// fqdn
+	case "from-fqdn":
+		ff.SourceFqdn = append(ff.SourceFqdn, value)
+
+	case "to-fqdn":
+		ff.DestinationFqdn = append(ff.DestinationFqdn, value)
+
+	// label
+	case "from-label":
+		ff.SourceLabel = append(ff.SourceLabel, value)
+
+	case "to-label":
+		ff.DestinationLabel = append(ff.DestinationLabel, value)
+
+	// service
+	case "from-service":
+
+		ff.SourceService = append(ff.SourceService, value)
+
+	case "to-service":
+		ff.DestinationService = append(ff.DestinationService, value)
+
+	// port
+	case "from-port":
+		ff.SourcePort = append(ff.SourcePort, value)
+
+	case "to-port":
+		ff.DestinationPort = append(ff.DestinationPort, value)
+
+		// TODO --verdict, --http-status, --http-method, --http-path, --tcp-flag, --ip-version, --nodename
+	}
+
+	o.whitelist = append(o.whitelist, ff)
 }
 
 // StartHubbleRelay Function
@@ -59,8 +166,8 @@ func StartHubbleRelay(o Options) error {
 	req := &observer.GetFlowsRequest{
 		Number:    num,
 		Follow:    o.Follow,
-		Whitelist: nil,
-		Blacklist: nil,
+		Whitelist: o.whitelist,
+		Blacklist: o.blacklist,
 		Since:     nil,
 		Until:     nil,
 	}
