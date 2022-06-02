@@ -46,7 +46,9 @@ var uninstallCmd = &cobra.Command{
 			RedactHelmCertKeys:   uparams.RedactHelmCertKeys,
 			Writer:               uparams.Writer,
 		})
-		h.Disable(context.Background())
+		if err := h.Disable(context.Background()); err != nil {
+			return err
+		}
 		uninstaller := ci.NewK8sUninstaller(k8sClient, uparams)
 		if err := uninstaller.Uninstall(context.Background()); err != nil {
 			log.Error().Msgf("Unable to uninstall Cilium: %s", err.Error())
