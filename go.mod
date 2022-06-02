@@ -18,12 +18,13 @@ replace (
 )
 
 require (
-	github.com/cilium/cilium v1.12.0-rc1.0.20220502150516-d29221d4dfcc // indirect
-	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220530163223-1aaee570cbe3 // indirect
+	github.com/cilium/cilium v1.12.0-rc1.0.20220502150516-d29221d4dfcc
+	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220321102834-0971f727bd8a // indirect
+	github.com/kubearmor/kubearmor-client v0.6.5-0.20220504103727-b61b3332aa85
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.4.0
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.0
 	k8s.io/api v0.24.0-alpha.0
 	k8s.io/apiextensions-apiserver v0.23.4 // indirect
 	k8s.io/apimachinery v0.24.0-alpha.0
@@ -35,6 +36,7 @@ require (
 require (
 	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220525185923-13b761d5cce6
 	github.com/cilium/cilium-cli v0.11.5
+	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
 	github.com/kubearmor/kubearmor-client v0.7.2
 	github.com/pkg/errors v0.9.1
@@ -88,7 +90,6 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.2 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d // indirect
-	github.com/fatih/color v1.13.0 // indirect
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/fullstorydev/grpcurl v1.8.1 // indirect
