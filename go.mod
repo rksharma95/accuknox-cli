@@ -19,8 +19,8 @@ replace (
 
 require (
 	github.com/cilium/cilium v1.12.0-rc1.0.20220502150516-d29221d4dfcc
-	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220321102834-0971f727bd8a // indirect
-	github.com/kubearmor/kubearmor-client v0.6.5-0.20220504103727-b61b3332aa85
+	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220530163223-1aaee570cbe3 // indirect
+	github.com/kubearmor/kubearmor-client v0.7.2
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.4.0
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
@@ -34,11 +34,10 @@ require (
 )
 
 require (
-	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220525185923-13b761d5cce6
+	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220429051056-69f8b3b285df
 	github.com/cilium/cilium-cli v0.11.5
 	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
-	github.com/kubearmor/kubearmor-client v0.7.2
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.46.0
 	gopkg.in/yaml.v2 v2.4.0

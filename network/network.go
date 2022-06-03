@@ -83,7 +83,17 @@ func UpdateBlackList(o *Options, flag string, value string) {
 	case "to-port":
 		ff.DestinationPort = append(ff.DestinationPort, value)
 
-		// TODO --verdict, --http-status, --http-method, --http-path, --tcp-flag, --ip-version, --nodename
+	// verdict
+	case "verdict":
+		v, ok := flow.Verdict_value[value]
+
+		if !ok {
+			fmt.Printf("invalid --verdict: %v", value)
+			os.Exit(1)
+		}
+		ff.Verdict = append(ff.Verdict, flow.Verdict(v))
+
+		// TODO --http-status, --http-method, --http-path, --tcp-flag, --ip-version, --nodename
 	}
 
 	o.blacklist = append(o.blacklist, ff)
@@ -135,10 +145,20 @@ func UpdateWhiteList(o *Options, flag string, value string) {
 	case "to-port":
 		ff.DestinationPort = append(ff.DestinationPort, value)
 
-		// TODO --verdict, --http-status, --http-method, --http-path, --tcp-flag, --ip-version, --nodename
+	// verdict
+	case "verdict":
+		v, ok := flow.Verdict_value[value]
+
+		if !ok {
+			fmt.Printf("invalid --verdict: %v", value)
+			os.Exit(1)
+		}
+		ff.Verdict = append(ff.Verdict, flow.Verdict(v))
 	}
+	// TODO --http-status, --http-method, --http-path, --tcp-flag, --ip-version, --nodename
 
 	o.whitelist = append(o.whitelist, ff)
+
 }
 
 // StartHubbleRelay Function

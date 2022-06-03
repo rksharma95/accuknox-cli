@@ -137,6 +137,24 @@ func handleFilterFlags(cmd *cobra.Command) {
 		}
 	}
 
+	// service
+	if flag, _ := cmd.Flags().GetString("from-service"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "from-service", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "from-service", flag)
+		}
+	}
+	if flag, _ := cmd.Flags().GetString("to-service"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "to-service", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "to-service", flag)
+		}
+	}
+
 	// port
 	if flag, _ := cmd.Flags().GetString("from-port"); flag != "" {
 		if isBlacklist {
@@ -152,6 +170,16 @@ func handleFilterFlags(cmd *cobra.Command) {
 			network.UpdateBlackList(&networkOptions, "to-port", flag)
 		} else {
 			network.UpdateWhiteList(&networkOptions, "to-port", flag)
+		}
+	}
+
+	//verdict
+	if flag, _ := cmd.Flags().GetString("verdict"); flag != "" {
+		if isBlacklist {
+			isBlacklist = false
+			network.UpdateBlackList(&networkOptions, "verdict", flag)
+		} else {
+			network.UpdateWhiteList(&networkOptions, "verdict", flag)
 		}
 	}
 }
@@ -196,11 +224,18 @@ func init() {
 	networkCmd.Flags().String("from-label", "", "Show all flows originating at the given lebel.")
 	networkCmd.Flags().String("to-label", "", "Show all flows destined to the given label")
 
+	//service
+	networkCmd.Flags().String("from-service", "", "Show all flows originating in the given service. ([namespace/]<svc-name>)")
+	networkCmd.Flags().String("to-service", "", "Show all flows destined to the given service. ([namespace/]<svc-name>)")
+
 	// port
 	networkCmd.Flags().String("from-port", "", "Show all flows originating at the given port.")
 	networkCmd.Flags().String("to-port", "", "Show all flows destined to the given port.")
 
+	//verdict
+	networkCmd.Flags().String("verdict", "", "Show all flows with given verdict. {VERDICT_UNKNOWN|FORWARDED|DROPPED|ERROR|AUDIT}")
+
 	// not
-	networkCmd.Flags().Bool("not", false, "reverse the effect of a flag.")
+	networkCmd.Flags().Bool("not", false, "reverse the effect of a flow control flag.")
 
 }
