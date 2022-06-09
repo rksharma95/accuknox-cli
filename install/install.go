@@ -105,7 +105,7 @@ func GetDeployment(namespace string) *appsv1.Deployment {
 					Containers: []corev1.Container{
 						{
 							Name:            "knoxautopolicy",
-							Image:           "seswarrajan/knoxautopolicy:dev",
+							Image:           "accuknox/knoxautopolicy:dev",
 							ImagePullPolicy: "Always",
 							Ports: []corev1.ContainerPort{
 								{
