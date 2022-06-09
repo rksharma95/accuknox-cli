@@ -37,8 +37,8 @@ func StartSummary(o Options) error {
 		}
 	}
 
-	data := &opb.Request{
-		Labels:    o.Labels,
+	data := &opb.LogsRequest{
+		Label:     o.Labels,
 		Namespace: o.Namespace,
 	}
 
@@ -52,7 +52,7 @@ func StartSummary(o Options) error {
 	client := opb.NewSummaryClient(conn)
 
 	//Fetch Summary Logs
-	stream, err := client.FetchLogs(context.Background(), &data)
+	stream, err := client.FetchLogs(context.Background(), data)
 	if err != nil {
 		return err
 	}
