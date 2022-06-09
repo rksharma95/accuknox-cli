@@ -34,7 +34,7 @@ require (
 )
 
 require (
-	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220429051056-69f8b3b285df
+	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220609061106-b39366f602ef
 	github.com/cilium/cilium-cli v0.11.5
 	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
