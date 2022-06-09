@@ -5,103 +5,22 @@ package summary
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"os"
+	"strings"
+	"time"
 
-	ipb "github.com/accuknox/auto-policy-discovery/src/protobuf/v1/insight"
-	"github.com/rs/zerolog/log"
+	opb "github.com/accuknox/auto-policy-discovery/src/protobuf/v1/observability"
+	"github.com/fatih/color"
 	"google.golang.org/grpc"
 )
 
 // Options Structure
 type Options struct {
-	GRPC          string
-	Labels        string
-	Containername string
-	Clustername   string
-	Fromsource    string
-	Namespace     string
-	Source        string
-	Type          string
-	Rule          string
-}
-
-// Resp Structure
-type Resp struct {
-	Resp []Res `json:"Res"`
-}
-
-// Res Structure
-type Res struct {
-	ClusterName     string            `json:"ClusterName"`
-	NameSpace       string            `json:"NameSpace"`
-	Labels          string            `json:"Labels"`
-	SystemResource  []SystemResource  `json:"SystemResource"`
-	NetworkResource []NetworkResource `json:"NetworkResource"`
-}
-
-// SystemResource Structure
-type SystemResource struct {
-	SysResource []SysResource `json:"SysResource"`
-}
-
-// NetworkResource Structure
-type NetworkResource struct {
-	NetResource []NetResource `json:"NetResource"`
-}
-
-// SysResource Structure
-type SysResource struct {
-	FromSource      string   `json:"fromSource"`
-	FilePaths       []string `json:"filePaths"`
-	NetworkProtocol []string `json:"networkProtocol"`
-	ProcessPaths    []string `json:"processPaths"`
-}
-
-// NetResource Structure
-type NetResource struct {
-	Egressess  []Egressess  `json:"Egressess"`
-	Ingressess []Ingressess `json:"Ingressess"`
-}
-
-// Egressess Structure
-type Egressess struct {
-	MatchLabels MatchLabels   `json:"MatchLabels"`
-	ToPorts     []ToPorts     `json:"ToPorts"`
-	ToEndtities []ToEndtities `json:"ToEndtities"`
-}
-
-// Ingressess Structure
-type Ingressess struct {
-	MatchLabels  MatchLabels    `json:"MatchLabels"`
-	ToPorts      []ToPorts      `json:"ToPorts"`
-	FromEntities []FromEntities `json:"FromEntities"`
-}
-
-// MatchLabels Structure
-type MatchLabels struct {
-	Container    string `json:"container"`
-	K8snamespace string `json:"k8s:io.kubernetes.pod.namespace"`
-}
-
-// ToPorts Structure
-type ToPorts struct {
-	Port     string `json:"Port"`
-	Protocol string `json:"Protocol"`
-}
-
-// FromEntities Structure
-type FromEntities struct {
-	Host      string `json:"host"`
-	Apiserver string `json:"kube-apiserver"`
-}
-
-// ToEndtities Structure
-type ToEndtities struct {
-	Host      string `json:"host"`
-	Apiserver string `json:"kube-apiserver"`
+	GRPC      string
+	Labels    string
+	Namespace string
 }
 
 // StartSummary : Get summary on observability data
@@ -118,16 +37,9 @@ func StartSummary(o Options) error {
 		}
 	}
 
-	data := &ipb.Request{
-		Request:       "observe",
-		Source:        o.Source,
-		Labels:        o.Labels,
-		ContainerName: o.Containername,
-		ClusterName:   o.Clustername,
-		FromSource:    o.Fromsource,
-		Namespace:     o.Namespace,
-		Type:          o.Type,
-		Rule:          o.Rule,
+	data := &opb.Request{
+		Labels:    o.Labels,
+		Namespace: o.Namespace,
 	}
 
 	// create a client
@@ -137,80 +49,76 @@ func StartSummary(o Options) error {
 	}
 	defer conn.Close()
 
-	client := ipb.NewInsightClient(conn)
+	client := opb.NewSummaryClient(conn)
 
-	// var response opb.Response
-	response, err := client.GetInsightData(context.Background(), data)
-	if err != nil {
-		return errors.New("could not connect to the server. Possible troubleshooting:\n- Check if discovery engine is running\n- Create a portforward to discovery engine service using\n\t\033[1mkubectl port-forward -n explorer service/knoxautopolicy --address 0.0.0.0 --address :: 9089:9089\033[0m\n- Configure grpc server information using\n\t\033[1mkarmor log --grpc <info>\033[0m")
-	}
-
-	var resp Resp
-	arr, err := json.Marshal(response)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal([]byte(arr), &resp)
+	//Fetch Summary Logs
+	stream, err := client.FetchLogs(context.Background(), &data)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Deployment Details:")
-	for _, res := range resp.Resp {
-
-		if o.Source == "system" || o.Source == "all" {
-			for _, sys := range res.SystemResource {
-				fmt.Println("\n---")
-				fmt.Println("\nLabels: " + res.Labels)
-				fmt.Println("Namespace: " + res.NameSpace)
-				fmt.Println("\nList of Processes:", len(sys.SysResource))
-				// fmt.Println(len(sys.SysResource))
-				for _, sysRes := range sys.SysResource {
-					if sysRes.FromSource != "" {
-						fmt.Println("\nProcess: " + sysRes.FromSource)
-					}
-					for _, procpath := range sysRes.ProcessPaths {
-						if sysRes.FromSource == "" {
-							fmt.Println("\nProcess: " + procpath)
-						} else {
-							fmt.Println("Child process: " + procpath)
-						}
-					}
-
-					for _, filepath := range sysRes.FilePaths {
-						fmt.Println("File system access: " + filepath)
-					}
-
-					for _, netpath := range sysRes.NetworkProtocol {
-						fmt.Println("Protocol: " + netpath)
-					}
-
-				}
-			}
-		} else if o.Source == "network" || o.Source == "all" {
-
-			// for _, net := range res.NetworkResource {
-			// 	fmt.Println(len(net.NetResource))
-			// 	for _, netRes := range net.NetResource {
-			// 		fmt.Println("Parent process: " + Res.FromSource)
-			// 		for _, filepath := range sysRes.FilePaths {
-			// 			fmt.Println("Child processes: " + filepath)
-			// 		}
-
-			// 		for _, netpath := range sysRes.NetworkProtocol {
-			// 			fmt.Println("Child processes: " + netpath)
-			// 		}
-
-			// 		for _, procpath := range sysRes.ProcessPaths {
-			// 			fmt.Println("Child processes: " + procpath)
-			// 		}
-
-			// 	}
-			// }
-		} else {
-			log.Error().Msgf("Source type not recognized. Source type available are system and network\n")
+	headerFmt := color.New(color.Underline).SprintfFunc()
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
 		}
-	}
+		if err != nil {
+			return err
+		}
+		fmt.Println("\n\n**********************************************************************")
+		fmt.Println("\nPod Name : ", res.PodDetail)
+		fmt.Println("\nNamespace : ", res.Namespace)
+		//Print List of Processes
+		fmt.Println("\nList of Processes (" + fmt.Sprint(len(res.ListOfProcess)) + ") :\n")
+		tbl := Heading("SOURCE", "DESTINATION", "COUNT", "LAST UPDATED TIME", "STATUS")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, process := range res.ListOfProcess {
+			for _, source := range process.ListOfDestination {
+				tbl.AddRow(process.Source, source.Destination, source.Count, time.Unix(source.LastUpdatedTime, 0).Format("1-02-2006 15:04:05"), strings.ToUpper(source.Status))
+			}
+		}
+		tbl.Print()
 
+		//Print List of File System
+		fmt.Println("\nList of File-system accesses (" + fmt.Sprint(len(res.ListOfFile)) + ") :\n")
+		tbl = Heading("SOURCE", "DESTINATION", "COUNT", "LAST UPDATED TIME", "STATUS")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, file := range res.ListOfFile {
+			for _, source := range file.ListOfDestination {
+				tbl.AddRow(file.Source, source.Destination, source.Count, time.Unix(source.LastUpdatedTime, 0).Format("1-02-2006 15:04:05"), strings.ToUpper(source.Status))
+			}
+		}
+		tbl.Print()
+
+		//Print List of Network Connection
+		fmt.Println("\nList of Network connections (" + fmt.Sprint(len(res.ListOfNetwork)) + ") :\n")
+		tbl = Heading("SOURCE", "Protocol", "COUNT", "LAST UPDATED TIME", "STATUS")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, network := range res.ListOfNetwork {
+			for _, source := range network.ListOfDestination {
+				tbl.AddRow(network.Source, source.Destination, source.Count, time.Unix(source.LastUpdatedTime, 0).Format("1-02-2006 15:04:05"), strings.ToUpper(source.Status))
+			}
+		}
+		tbl.Print()
+
+		//Print Ingress Connections
+		fmt.Printf("\nIngress Connections :\n\n")
+		tbl = Heading("DESTINATION LABEL", "DESTINATION NAMESPACE", "PROTOCOL", "PORT", "COUNT", "LAST UPDATED TIME", "STATUS")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, ingress := range res.Ingress {
+			tbl.AddRow(ingress.DestinationLabels, ingress.DestinationNamespace, ingress.Protocol, ingress.Port, ingress.Count, time.Unix(ingress.LastUpdatedTime, 0).Format("1-02-2006 15:04:05"), ingress.Status)
+		}
+		tbl.Print()
+
+		//Print Egress Connections
+		fmt.Printf("\nEgress Connections : \n\n")
+		tbl = Heading("DESTINATION LABEL", "DESTINATION NAMESPACE", "PROTOCOL", "PORT", "COUNT", "LAST UPDATED TIME", "STATUS")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, egress := range res.Egress {
+			tbl.AddRow(egress.DestinationLabels, egress.DestinationNamespace, egress.Protocol, egress.Port, egress.Count, time.Unix(egress.LastUpdatedTime, 0).Format("1-02-2006 15:04:05"), egress.Status)
+		}
+		tbl.Print()
+	}
 	return nil
 }

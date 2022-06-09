@@ -25,10 +25,6 @@ var summaryCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(summaryCmd)
-
-	summaryCmd.Flags().StringVar(&summaryOptions.Source, "source", "all", "The DB for summary : system|network|all")
 	summaryCmd.Flags().StringVar(&summaryOptions.Labels, "labels", "", "Labels for resources")
-	summaryCmd.Flags().StringVar(&summaryOptions.Fromsource, "fromsource", "", "Filter according to the source path")
 	summaryCmd.Flags().StringVarP(&summaryOptions.Namespace, "namespace", "n", "", "Namespace for resources")
-	//summaryCmd.Flags().StringVar(&summaryOptions.Type, "type", "", "NW packet type : ingress|egress")
 }
