@@ -5,6 +5,7 @@ package summary
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -54,7 +55,7 @@ func StartSummary(o Options) error {
 	//Fetch Summary Logs
 	stream, err := client.FetchLogs(context.Background(), data)
 	if err != nil {
-		return err
+		return errors.New("could not connect to the server. Possible troubleshooting:\n- Check if discovery engine is running\n- Create a portforward to discovery engine service using\n\t\033[1mkubectl port-forward -n explorer service/knoxautopolicy --address 0.0.0.0 --address :: 9089:9089\033[0m")
 	}
 
 	headerFmt := color.New(color.Underline).SprintfFunc()
