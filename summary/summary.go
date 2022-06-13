@@ -120,6 +120,25 @@ func StartSummary(o Options) error {
 			tbl.AddRow(egress.DestinationLabels, egress.DestinationNamespace, egress.Protocol, egress.Port, egress.Count, time.Unix(egress.LastUpdatedTime, 0).Format("1-02-2006 15:04:05"), egress.Status)
 		}
 		tbl.Print()
+
+		//Print System Incoming connections
+		fmt.Println("\nList of Incoming server connections (" + fmt.Sprint(len(res.InServerConn)) + ") :\n")
+		tbl = Heading("ADDRESS-FAMILY", "PATH")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, inConn := range res.InServerConn {
+			tbl.AddRow(inConn.AddressFamily, inConn.Path)
+		}
+		tbl.Print()
+
+		//Print System Outgoing connections
+		fmt.Println("\nList of Outgoing server connections (" + fmt.Sprint(len(res.OutServerConn)) + ") :\n")
+		tbl = Heading("ADDRESS-FAMILY", "PATH")
+		tbl.WithHeaderFormatter(headerFmt)
+		for _, outConn := range res.OutServerConn {
+			tbl.AddRow(outConn.AddressFamily, outConn.Path)
+		}
+		tbl.Print()
+
 	}
 	return nil
 }

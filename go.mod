@@ -4,8 +4,8 @@ go 1.18
 
 replace (
 	github.com/accuknox/accuknox-cli/ => ./
-	// github.com/cilium/cilium-cli/defaults => ../../cilium-cli/defaults
 	github.com/accuknox/accuknox-cli/install => ./install
+	github.com/accuknox/accuknox-cli/summary => ./summary
 	github.com/cilium/cilium => github.com/cilium/cilium v1.10.0
 	github.com/cilium/cilium-cli => github.com/cilium/cilium-cli v0.11.4
 	github.com/optiopay/kafka => github.com/cilium/kafka v0.0.0-20180809090225-01ce283b732b
@@ -34,7 +34,7 @@ require (
 )
 
 require (
-	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220609061106-b39366f602ef
+	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220613054818-4f90d2d2aca8
 	github.com/cilium/cilium-cli v0.11.5
 	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
