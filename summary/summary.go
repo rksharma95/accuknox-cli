@@ -38,7 +38,6 @@ func StartSummary(o Options) error {
 		}
 	}
 
-	//data := &opb.LogsRequest{
 	data := &opb.LogsRequest{
 		Label:     o.Labels,
 		Namespace: o.Namespace,
@@ -51,7 +50,6 @@ func StartSummary(o Options) error {
 	}
 	defer conn.Close()
 
-	//client := opb.NewSummaryClient(conn)
 	client := opb.NewSummaryClient(conn)
 
 	//Fetch Summary Logs
