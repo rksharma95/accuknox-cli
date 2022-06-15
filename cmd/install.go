@@ -98,9 +98,11 @@ var installCmd = &cobra.Command{
 		if dflag != "discoveryengine" {
 			// Install MySQL DB
 			installOptions.Namespace = namespace
+			/* disabling mysql since discovery-engine now uses sqlite3
 			if err := di.MySQLInstaller(client); err != nil {
 				return err
 			}
+			*/
 
 			// Install dscovery-engine
 			diOptions.Namespace = namespace

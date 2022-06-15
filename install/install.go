@@ -308,13 +308,12 @@ func DiscoveryEngineInstaller(c *k8s.Client, o Options) error {
 			metav1.CreateOptions{},
 		)
 	if err != nil {
-		panic(err.Error())
-	}
-
-	fmt.Printf("Created ConfigMap %s/%s\n", namespace, created.GetName())
-
-	if !reflect.DeepEqual(created.Data, cm.Data) {
-		panic("Created ConfigMap has unexpected data")
+		fmt.Printf("%s\n", err.Error())
+		if !reflect.DeepEqual(created.Data, cm.Data) {
+			fmt.Print("WARN: existing ConfigMap has different data from the default one, not overwriting\n")
+		}
+	} else {
+		fmt.Printf("Created ConfigMap %s/%s\n", namespace, created.GetName())
 	}
 
 	// discovery-engine Deployment
