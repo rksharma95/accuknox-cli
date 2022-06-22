@@ -8,19 +8,21 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/accuknox/accuknox-cli/selfupdate"
+	"github.com/fatih/color"
 	"github.com/kubearmor/kubearmor-client/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// GitSummary for karmor git build
-var GitSummary string
-
-// BuildDate for karmor git build
-var BuildDate string
-
-// PrintVersion handler for karmor version
+// PrintVersion handler for accuknox-cli version
 func PrintVersion(c *k8s.Client) error {
-	fmt.Printf("accuknox-cli version %s %s/%s BuildDate=%s\n", GitSummary, runtime.GOOS, runtime.GOARCH, BuildDate)
+	fmt.Printf("accuknox-cli version %s %s/%s BuildDate=%s\n",
+		selfupdate.GitSummary, runtime.GOOS, runtime.GOARCH, selfupdate.BuildDate)
+	latest, latestVer := selfupdate.IsLatest(selfupdate.GitSummary)
+	if !latest {
+		color.HiMagenta("update available version " + latestVer)
+		color.HiMagenta("use [accuknox selfupdate] to update to latest.")
+	}
 	kubearmorVersion, err := getKubeArmorVersion(c)
 	if err != nil {
 		return nil
