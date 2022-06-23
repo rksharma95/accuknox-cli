@@ -19,8 +19,8 @@ replace (
 
 require (
 	github.com/cilium/cilium v1.12.0-rc1.0.20220502150516-d29221d4dfcc
-	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220530163223-1aaee570cbe3 // indirect
-	github.com/kubearmor/kubearmor-client v0.7.2
+	github.com/kubearmor/KubeArmor/pkg/KubeArmorPolicy v0.0.0-20220620050120-7e1810d2ad41 // indirect
+	github.com/kubearmor/kubearmor-client v0.7.4
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.4.0
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
@@ -34,12 +34,12 @@ require (
 )
 
 require (
-	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220613054818-4f90d2d2aca8
+	github.com/accuknox/auto-policy-discovery/src v0.0.0-20220622153732-597108ffed2c
 	github.com/cilium/cilium-cli v0.11.5
 	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
 	github.com/pkg/errors v0.9.1
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.47.0
 	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.8.1
 )
@@ -72,7 +72,7 @@ require (
 	github.com/cloudflare/cfssl v1.6.1 // indirect
 	github.com/cncf/udpa/go v0.0.0-20210930031921-04548b0d99d4 // indirect
 	github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490 // indirect
-	github.com/containerd/containerd v1.5.9 // indirect
+	github.com/containerd/containerd v1.5.13 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
@@ -143,11 +143,11 @@ require (
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/kubearmor/KVMService/src/types v0.0.0-20220228115540-2211247620dd // indirect
-	github.com/kubearmor/KubeArmor/KubeArmor v0.0.0-20220321102834-0971f727bd8a // indirect
-	github.com/kubearmor/KubeArmor/deployments v0.0.0-20220321102834-0971f727bd8a // indirect
-	github.com/kubearmor/KubeArmor/pkg/KubeArmorHostPolicy v0.0.0-20220530163223-1aaee570cbe3 // indirect
-	github.com/kubearmor/KubeArmor/protobuf v0.0.0-20220517043351-a9160288d20b // indirect
+	github.com/kubearmor/KVMService/src/types v0.0.0-20220619161146-0f42a61893bc // indirect
+	github.com/kubearmor/KubeArmor/KubeArmor v0.0.0-20220620050120-7e1810d2ad41 // indirect
+	github.com/kubearmor/KubeArmor/deployments v0.0.0-20220620050120-7e1810d2ad41 // indirect
+	github.com/kubearmor/KubeArmor/pkg/KubeArmorHostPolicy v0.0.0-20220620050120-7e1810d2ad41 // indirect
+	github.com/kubearmor/KubeArmor/protobuf v0.0.0-20220620050120-7e1810d2ad41 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/lib/pq v1.10.4 // indirect
