@@ -43,13 +43,19 @@ Usage:
   accuknox [command]
 
 Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  discover    Discover applicable policies
-  help        Help about any command
-  install     Install KubeArmor, Cilium and Discovery-engine in a Kubernetes Cluster
-  summary     Policy summary from discovery engine
-  uninstall   Uninstall KubeArmor, Cilium and Discovery-engine from a Kubernetes Cluster
-  version     Display version information
+  completion   Generate the autocompletion script for the specified shell
+  discover     Discover applicable policies
+  help         Help about any command
+  install      Install KubeArmor, Cilium and Discovery-engine in a Kubernetes Cluster
+  log          Observe Logs from KubeArmor
+  port-forward port-forward KubeArmor, Cilium and Discovery-engine in a Kubernetes Cluster
+  selfupdate   selfupdate this cli tool
+  summary      Policy summary from discovery engine
+  sysdump      Collect system dump information for troubleshooting and error report
+  uninstall    Uninstall KubeArmor, Cilium and Discovery-engine from a Kubernetes Cluster
+  version      Display version information
+  vm           Vm commands for kvmservice
+
 
 Flags:
   -h, --help   help for accuknox
