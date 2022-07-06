@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"errors"
 
 	di "github.com/accuknox/accuknox-cli/install"
 	"github.com/cilium/cilium-cli/defaults"
@@ -55,64 +56,115 @@ var installCmd = &cobra.Command{
 		dflag, _ := cmd.Flags().GetString("disable")
 
 		//validate disable flag input
-		err := validateDisableFlagInput(dflag)
+		if err := validateDisableFlagInput(dflag); err != nil {
+			return err
+		}
+		
+		// validate only flag
+		onlyFlag, _ := cmd.Flags().GetString("only")
 
-		if err != nil {
+		if err := validateDisableFlagInput(onlyFlag); err != nil {
 			return err
 		}
 
-		if dflag != "cilium" {
-			// Install Cilium
-			params.Namespace = namespace
-			installer, err := ci.NewK8sInstaller(k8sClient, params)
-			if err != nil {
-				return err
-			}
-			cmd.SilenceUsage = true
-			if err := installer.Install(context.Background()); err != nil {
-				installer.RollbackInstallation(context.Background())
+		switch onlyFlag {
+			case "none":
+				if dflag != "cilium" {	
+					// Install Cilium		
+					if err := installCilium(cmd); err != nil {
+						return err
+					}
+						
+				}
 
-				log.Error().Msgf("Unable to install Cilium: %s", err.Error())
-			}
+				if dflag != "kubearmor" {
+					// Install KubeArmor			
+					if err := installKubeArmor(); err != nil {
+						return err
+					}				
+				}
 
-			// Enable cilium hubble
-			hparams.Namespace = namespace
-			hparams.Relay = true
-			hparams.HelmValuesSecretName = defaults.HelmValuesSecretName
-			hparams.RedactHelmCertKeys = true
-			hparams.CreateCA = true
-			h := hubble.NewK8sHubble(k8sClient, hparams)
-			if err := h.Enable(context.Background()); err != nil {
-				log.Error().Msgf("Unable to enable Hubble: %s", err.Error())
-			}
-		}
-
-		if dflag != "kubearmor" {
-			// Install KubeArmor
-			installOptions.Namespace = namespace
-			if err := ki.K8sInstaller(client, installOptions); err != nil {
-				return err
-			}
-		}
-
-		if dflag != "discoveryengine" {
-			// Install MySQL DB
-			installOptions.Namespace = namespace
-			/* disabling mysql since discovery-engine now uses sqlite3
-			if err := di.MySQLInstaller(client); err != nil {
-				return err
-			}
-			*/
-
-			// Install dscovery-engine
-			diOptions.Namespace = namespace
-			if err := di.DiscoveryEngineInstaller(client, diOptions); err != nil {
-				return err
-			}
-		}
+				if dflag != "discoveryengine" {
+					// Install dscovery-engine
+					if err := installDiscoveryEngine(); err != nil {
+						return err
+					}				
+				}
+				break
+			case "cilium":
+				if err := installCilium(cmd); err != nil {
+					return err
+				}
+				break
+			case "kubearmor":
+				if err := installKubeArmor(); err != nil {
+					return err
+				}
+				break
+			case "discoveryengine":
+				if err := installDiscoveryEngine(); err != nil {
+					return err
+				}	
+		} 
 
 		return nil
 	},
+}
+
+func installCilium(cmd *cobra.Command) error{
+	// Install Cilium
+	params.Namespace = namespace
+	installer, err := ci.NewK8sInstaller(k8sClient, params)
+	if err != nil {
+		return err
+	}
+	cmd.SilenceUsage = true
+	if err := installer.Install(context.Background()); err != nil {
+		installer.RollbackInstallation(context.Background())
+
+		return errors.New("Unable to install Cilium: "+ err.Error())
+	}
+
+	// Enable cilium hubble
+	hparams.Namespace = namespace
+	hparams.Relay = true
+	hparams.HelmValuesSecretName = defaults.HelmValuesSecretName
+	hparams.RedactHelmCertKeys = true
+	hparams.CreateCA = true
+	h := hubble.NewK8sHubble(k8sClient, hparams)
+	if err := h.Enable(context.Background()); err != nil {
+		return errors.New("Unable to enable Hubble: " + err.Error())
+	}
+	
+	return nil
+}
+
+func installKubeArmor() error{
+	// Install KubeArmor
+	installOptions.Namespace = namespace
+	if err := ki.K8sInstaller(client, installOptions); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func installDiscoveryEngine() error{
+	// Install MySQL DB
+	installOptions.Namespace = namespace
+	/* disabling mysql since discovery-engine now uses sqlite3
+	if err := di.MySQLInstaller(client); err != nil {
+		return err
+	}
+	*/
+
+	// Install dscovery-engine
+	diOptions.Namespace = namespace
+	if err := di.DiscoveryEngineInstaller(client, diOptions); err != nil {
+		return err
+	}
+	
+	return nil
 }
 
 func init() {
@@ -120,6 +172,8 @@ func init() {
 
 	// disable flag
 	installCmd.Flags().StringVarP(&disable, "disable", "d", "none", "disable installing a program { cilium | kubearmor | discoveryengine }")
+	// only 
+	installCmd.Flags().String("only", "none", "install only a specific program { cilium | kubearmor | discoveryengine }")
 
 	//kubearmor
 	installCmd.Flags().StringVarP(&installOptions.KubearmorImage, "image", "i", "kubearmor/kubearmor:stable", "Kubearmor daemonset image to use")
