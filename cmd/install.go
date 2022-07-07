@@ -13,10 +13,11 @@ import (
 	ki "github.com/kubearmor/kubearmor-client/install"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
 )
 
 var (
-	disable        string
+	disable        []string
 	namespace      string
 	installOptions ki.Options
 	params         = ci.Parameters{Writer: os.Stdout}
@@ -30,16 +31,19 @@ const (
 	encryptionWireguard = "wireguard"
 )
 
-func validateDisableFlagInput(in string) error {
-	var err error = nil
+func validateDisableFlagInput(in []string) error {
+	var err error
 
 	type void struct{}
 	var item void
 
-	flagInputSet := map[string]void{"cilium": item, "kubearmor": item, "discoveryengine": item, "none": item}
+	flagInputSet := map[string]void{"cilium": item, "kubearmor": item, "discoveryengine": item}
 
-	if _, ok := flagInputSet[in]; !ok {
-		err = fmt.Errorf("❌ invalid input %q for disable flag | run  $ accuknox install --help for more", in)
+	for _, a := range in {
+		if _, ok := flagInputSet[a]; !ok {
+			err = fmt.Errorf("❌ invalid input %q for disable flag | run  $ accuknox install --help for more", a)
+			break
+		}
 	}
 
 	return err
@@ -52,16 +56,14 @@ var installCmd = &cobra.Command{
 	Long:  `Install KubeArmor, Cilium and Discovery-engine in a Kubernetes Clusters`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		dflag, _ := cmd.Flags().GetString("disable")
-
 		//validate disable flag input
-		err := validateDisableFlagInput(dflag)
+		err := validateDisableFlagInput(disable)
 
 		if err != nil {
 			return err
 		}
 
-		if dflag != "cilium" {
+		if !slices.Contains(disable, "cilium") {
 			// Install Cilium
 			params.Namespace = namespace
 			installer, err := ci.NewK8sInstaller(k8sClient, params)
@@ -87,7 +89,7 @@ var installCmd = &cobra.Command{
 			}
 		}
 
-		if dflag != "kubearmor" {
+		if !slices.Contains(disable, "kubearmor") {
 			// Install KubeArmor
 			installOptions.Namespace = namespace
 			if err := ki.K8sInstaller(client, installOptions); err != nil {
@@ -95,7 +97,7 @@ var installCmd = &cobra.Command{
 			}
 		}
 
-		if dflag != "discoveryengine" {
+		if !slices.Contains(disable, "discoveryengine") {
 			// Install MySQL DB
 			installOptions.Namespace = namespace
 			/* disabling mysql since discovery-engine now uses sqlite3
@@ -119,7 +121,7 @@ func init() {
 	rootCmd.AddCommand(installCmd)
 
 	// disable flag
-	installCmd.Flags().StringVarP(&disable, "disable", "d", "none", "disable installing a program { cilium | kubearmor | discoveryengine }")
+	installCmd.Flags().StringSliceVarP(&disable, "disable", "d", []string{}, "disable installing a program { cilium | kubearmor | discoveryengine }")
 
 	//kubearmor
 	installCmd.Flags().StringVarP(&installOptions.KubearmorImage, "image", "i", "kubearmor/kubearmor:stable", "Kubearmor daemonset image to use")
