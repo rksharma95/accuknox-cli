@@ -213,7 +213,7 @@ var cm = corev1.ConfigMap{
   cluster:
     cluster-info-from: "k8sclient"            # k8sclient|accuknox
 
-observability: true
+observability: false
 
 database:
   driver: sqlite3
